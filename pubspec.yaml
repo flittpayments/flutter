@@ -1,8 +1,8 @@
-name: cloudipsp_mobile
-description: Cloudipsp SDK for Mobile(Android, iOS). The only way to accept payment with Fondy service on Flutter platform for mobiles.
-version: 0.4.1
-homepage: https://github.com/cloudipsp/flutter-mobile-sdk
-repository: https://github.com/cloudipsp/flutter-mobile-sdk
+name: flitt_mobile
+description: Flitt SDK for Mobile(Android, iOS). The only way to accept payment with Fondy service on Flutter platform for mobiles.
+version: 1.0.0
+homepage: https://github.com/flittpayments/flutter
+repository: https://github.com/flittpayments/flutter
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -26,8 +26,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.cloudipsp.mobile
-        pluginClass: CloudipspMobilePlugin
+        package: com.flitt.mobile
+        pluginClass: FlittMobilePlugin
       ios:
-        pluginClass: CloudipspMobilePlugin
-publish_to: none
+        pluginClass: FlittMobilePlugin
