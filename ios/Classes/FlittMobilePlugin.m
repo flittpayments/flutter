@@ -1,9 +1,9 @@
-#import "CloudipspMobilePlugin.h"
+#import "FlittMobilePlugin.h"
 
 #import <PassKit/PassKit.h>
 
 API_AVAILABLE(ios(11.0))
-@interface CloudipspMobilePlugin () <PKPaymentAuthorizationViewControllerDelegate>
+@interface FlittMobilePlugin () <PKPaymentAuthorizationViewControllerDelegate>
 
 @property (nonatomic, strong) FlutterResult applePayResult;
 @property (nonatomic, strong) FlutterResult applePayCompleteResult;
@@ -12,12 +12,12 @@ API_AVAILABLE(ios(11.0))
 @end
 
 
-@implementation CloudipspMobilePlugin
+@implementation FlittMobilePlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   FlutterMethodChannel* channel = [FlutterMethodChannel
       methodChannelWithName:@"cloudipsp_mobile"
             binaryMessenger:[registrar messenger]];
-  CloudipspMobilePlugin* instance = [[CloudipspMobilePlugin alloc] init];
+  FlittMobilePlugin* instance = [[FlittMobilePlugin alloc] init];
   [registrar addMethodCallDelegate:instance channel:channel];
 }
 
@@ -35,12 +35,12 @@ API_AVAILABLE(ios(11.0))
 
 - (void)applePay:(NSDictionary *)params result:(FlutterResult)result {
     self.applePayResult = result;
-    
+
     NSDictionary *config = [params objectForKey:@"config"];
     NSInteger amount = [[params objectForKey:@"amount"] intValue];
     NSString *currency = [params objectForKey:@"currency"];
     NSString *about = [params objectForKey:@"about"];
-    
+
     NSDictionary* data = [config objectForKey:@"data"];
     PKPaymentRequest *paymentRequest = [[PKPaymentRequest alloc] init];
     paymentRequest.countryCode = @"US";
@@ -48,7 +48,7 @@ API_AVAILABLE(ios(11.0))
     paymentRequest.merchantCapabilities = PKMerchantCapability3DS;
     paymentRequest.merchantIdentifier = [data objectForKey:@"merchantIdentifier"];
     paymentRequest.currencyCode = currency;
-    
+
     NSDecimalNumber *fixedAmount = [[NSDecimalNumber alloc] initWithMantissa:amount exponent:-2 isNegative:NO];
     NSMutableArray *items = [NSMutableArray new];
     PKPaymentSummaryItem *infoItem = [PKPaymentSummaryItem summaryItemWithLabel:about amount:fixedAmount];
@@ -57,7 +57,7 @@ API_AVAILABLE(ios(11.0))
     PKPaymentSummaryItem *mainItem = [PKPaymentSummaryItem summaryItemWithLabel: [config objectForKey:@"businessName"] amount:fixedAmount];
     [items addObject:mainItem];
     paymentRequest.paymentSummaryItems = items;
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
         PKPaymentAuthorizationViewController *controller = [[PKPaymentAuthorizationViewController alloc] initWithPaymentRequest:paymentRequest];
         controller.delegate = self;
@@ -75,13 +75,13 @@ API_AVAILABLE(ios(11.0))
     if (rootViewController.presentedViewController == nil) {
         return rootViewController;
     }
-    
+
     if ([rootViewController.presentedViewController isKindOfClass:[UINavigationController class]]) {
         UINavigationController *navigationController = (UINavigationController *)rootViewController.presentedViewController;
         UIViewController *lastViewController = [[navigationController viewControllers] lastObject];
         return [self topViewController:lastViewController];
     }
-    
+
     UIViewController *presentedViewController = (UIViewController *)rootViewController.presentedViewController;
     return [self topViewController:presentedViewController];
 }
@@ -92,7 +92,7 @@ API_AVAILABLE(ios(11.0))
         if (@available(iOS 11.0, *)) {
             void (^callback)(PKPaymentAuthorizationResult *) = self.applePayCallback;
             self.applePayCallback = nil;
-        
+
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (success) {
                     callback([[PKPaymentAuthorizationResult alloc] initWithStatus:PKPaymentAuthorizationStatusSuccess errors:nil]);
@@ -111,7 +111,7 @@ API_AVAILABLE(ios(11.0))
     if (completeResult == nil) {
         FlutterResult result = self.applePayResult;
         self.applePayResult = nil;
-        
+
         [controller dismissViewControllerAnimated:YES completion:^{
             result([FlutterError errorWithCode:@"UserCanceled" message:@"User canceled ApplePay authentication" details:nil]);
         }];
@@ -129,12 +129,12 @@ API_AVAILABLE(ios(11.0))
 {
     self.applePayCallback = completion;
     NSError *jsonError;
-    
+
     NSDictionary *paymentData = [NSJSONSerialization JSONObjectWithData:payment.token.paymentData options:NSJSONReadingMutableContainers error:&jsonError];
     NSDictionary *paymentMethod = @{
                                     @"displayName":payment.token.paymentMethod.displayName,
                                     @"network":payment.token.paymentMethod.network,
-                                    @"type": [CloudipspMobilePlugin paymentMethodName: payment.token.paymentMethod.type],
+                                    @"type": [FlittMobilePlugin paymentMethodName: payment.token.paymentMethod.type],
                                     };
     NSDictionary *paymentToken = @{
                                    @"paymentData": paymentData,

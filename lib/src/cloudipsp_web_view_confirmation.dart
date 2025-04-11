@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:cloudipsp_mobile/src/native.dart';
+import 'package:flitt_mobile/src/native.dart';
 import 'package:http/http.dart' as http;
 
 import './receipt.dart';

@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-import 'package:cloudipsp_mobile/src/cloudipsp_error.dart';
+import 'package:flitt_mobile/src/cloudipsp_error.dart';
 
 const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
 Random _rnd = Random();

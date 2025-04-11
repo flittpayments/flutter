@@ -6,7 +6,7 @@ import 'package:mockito/mockito.dart';
 
 import 'package:flutter/services.dart';
 
-import 'package:cloudipsp_mobile/src/native.dart';
+import 'package:flitt_mobile/src/native.dart';
 
 import './native_test.mocks.dart';
 

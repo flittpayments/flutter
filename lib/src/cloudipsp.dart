@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import './api.dart';
 import './cloudipsp_error.dart';
@@ -11,6 +12,9 @@ import './native.dart';
 import './order.dart';
 import './platform_specific.dart';
 import './receipt.dart';
+import 'bank.dart';
+import 'bankRedirectDetails.dart';
+import 'deviceInfoProvider.dart';
 
 typedef void CloudipspWebViewHolder(CloudipspWebViewConfirmation confirmation);
 
@@ -35,11 +39,22 @@ abstract class Cloudipsp {
 
   Future<Receipt> applePayToken(String token);
 
-  Future<Receipt> googlePay(Order order,dynamic config);
+  Future<Receipt> googlePay(Order order, dynamic config);
 
-  Future<Receipt> googlePayToken(String token,dynamic config);
+  Future<Receipt> googlePayToken(String token, dynamic config);
 
   Future<dynamic> initializePaymentConfig(Order? order, {String? token});
+
+  Future<List<Bank>> getAvailableBankList(Order order);
+
+  Future<List<Bank>> getAvailableBankListByToken(String token);
+
+  Future<BankRedirectDetails> initiateBankPayment(Bank bank, Order order,
+      {bool autoRedirect = true});
+
+  Future<BankRedirectDetails> initiateBankPaymentByToken(
+      String token, Bank bank,
+      {bool autoRedirect = true});
 }
 
 class CloudipspImpl implements Cloudipsp {
@@ -185,7 +200,7 @@ class CloudipspImpl implements Cloudipsp {
   }
 
   @override
-  Future<Receipt> googlePay(Order order,dynamic config) async {
+  Future<Receipt> googlePay(Order order, dynamic config) async {
     if (!(merchantId > 0)) {
       throw ArgumentError.value(merchantId, 'merchantId');
     }
@@ -213,13 +228,13 @@ class CloudipspImpl implements Cloudipsp {
       amount: order?.amount,
       currency: order?.currency,
       methodId: 'https://google.com/pay',
-      methodName:  'GooglePay',
+      methodName: 'GooglePay',
     );
     return config;
   }
 
   @override
-  Future<Receipt> googlePayToken(String token,dynamic config) async {
+  Future<Receipt> googlePayToken(String token, dynamic config) async {
     _assertGooglePay();
     final order = await _api.getOrder(token);
     dynamic googlePayInfo;
@@ -232,6 +247,138 @@ class CloudipspImpl implements Cloudipsp {
     final checkout = await _api.checkoutNativePay(
         token, null, config['payment_system'], googlePayInfo);
     return _payContinue(checkout, token, order.responseUrl);
+  }
+
+  @override
+  Future<List<Bank>> getAvailableBankList(Order order) async {
+    if (order == null) {
+      throw ArgumentError.value(order, 'order');
+    }
+    final token = await _api.getToken(merchantId, order);
+    return getAvailableBankListByToken(token);
+  }
+
+  @override
+  Future<List<Bank>> getAvailableBankListByToken(String token) async {
+    try {
+      final response = await _api.getAjaxInfo(token);
+      List<Bank> banks = [];
+
+      if (response.containsKey('tabs')) {
+        final tabs = response['tabs'];
+        if (tabs.containsKey('trustly')) {
+          final trustly = tabs['trustly'];
+          if (trustly.containsKey('payment_systems')) {
+            final paymentSystems = trustly['payment_systems'];
+            paymentSystems.forEach((key, bankData) {
+              if (bankData is Map<String, dynamic>) {
+                banks.add(Bank(
+                    bankId: key,
+                    countryPriority: bankData['country_priority'] ?? 0,
+                    userPriority: bankData['user_priority'] ?? 0,
+                    quickMethod: bankData['quick_method'] ?? false,
+                    userPopular: bankData['user_popular'] ?? false,
+                    name: bankData['name'] ?? '',
+                    country: bankData['country'] ?? '',
+                    bankLogo: bankData['bank_logo'] ?? '',
+                    alias: bankData['alias'] ?? ''));
+              }
+            });
+          }
+        }
+      }
+
+      // Sort banks by user priority and country priority
+      banks.sort((bank1, bank2) {
+        if (bank1.userPriority != bank2.userPriority) {
+          return bank2.userPriority.compareTo(bank1.userPriority);
+        }
+        return bank2.countryPriority.compareTo(bank1.countryPriority);
+      });
+
+      return banks;
+    } catch (e) {
+      throw CloudipspError(
+          'Failed to get available bank list: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<BankRedirectDetails> initiateBankPayment(Bank bank, Order order,
+      {bool autoRedirect = true}) async {
+    if (merchantId == null) {
+      throw ArgumentError.value(merchantId, 'merchantId');
+    }
+
+    final token = await _api.getToken(merchantId, order);
+    return initiateBankPaymentByToken(token, bank, autoRedirect: autoRedirect);
+  }
+
+  @override
+  Future<BankRedirectDetails> initiateBankPaymentByToken(
+      String token, Bank bank,
+      {bool autoRedirect = true}) async {
+    try {
+      // Get device info
+      final deviceInfoProvider = DeviceInfoProvider();
+      final deviceFingerprint =
+          await deviceInfoProvider.getEncodedDeviceFingerprint();
+
+      // Get order information
+      final receipt = await _api.getAjaxInfo(token);
+      final orderData = receipt['order_data'];
+
+      // Create payment request
+      final Map<String, dynamic> requestObj = {
+        'merchant_id': orderData['merchant_id'],
+        'amount': orderData['amount'],
+        'currency': orderData['currency'],
+        'token': token,
+        'payment_system': bank.bankId,
+        'kkh': deviceFingerprint,
+      };
+
+      print("requestObject: " + deviceFingerprint);
+
+      final response = await _api.callAjax(requestObj);
+
+      final responseStatus = response['response_status'] ?? '';
+      final action = response['action'] ?? '';
+
+      if (responseStatus == 'success' &&
+          action == 'redirect' &&
+          response.containsKey('url')) {
+        final redirectUrl = response['url'];
+        final target = response['target'] ?? '_top';
+
+        final bankRedirectDetails = BankRedirectDetails(
+            action: action,
+            url: redirectUrl,
+            target: target,
+            responseStatus: responseStatus);
+
+        if (autoRedirect) {
+          await _launchUrl(redirectUrl);
+        }
+
+        return bankRedirectDetails;
+      } else {
+        throw CloudipspError(
+            'Payment initiation failed: payment status: $responseStatus, action: $action');
+      }
+    } catch (e) {
+      throw CloudipspError('Failed to initiate bank payment: ${e.toString()}');
+    }
+  }
+
+  Future<bool> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await launcher.canLaunchUrl(uri)) {
+      return await launcher.launchUrl(uri,
+          mode: launcher.LaunchMode.externalApplication);
+    } else {
+      throw Exception('Could not launch URL: $url');
+    }
   }
 
   Future<Receipt> _payContinue(
@@ -267,8 +414,8 @@ class CloudipspImpl implements Cloudipsp {
 
     final response = await _api.call3ds(url, body, contentType);
     final completer = new Completer<Receipt?>();
-    _cloudipspWebViewHolder(PrivateCloudipspWebViewConfirmation(_native,
-        Api.API_HOST, url, callbackUrl, response, completer));
+    _cloudipspWebViewHolder(PrivateCloudipspWebViewConfirmation(
+        _native, Api.API_HOST, url, callbackUrl, response, completer));
     return completer.future;
   }
 }

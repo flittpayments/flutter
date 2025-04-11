@@ -6,10 +6,10 @@ import 'package:mockito/mockito.dart';
 
 import 'package:http/http.dart' as http;
 
-import 'package:cloudipsp_mobile/cloudipsp_mobile.dart';
-import 'package:cloudipsp_mobile/src/api.dart';
-import 'package:cloudipsp_mobile/src/credit_card.dart';
-import 'package:cloudipsp_mobile/src/platform_specific.dart';
+import 'package:flitt_mobile/flitt_mobile.dart';
+import 'package:flitt_mobile/src/api.dart';
+import 'package:flitt_mobile/src/credit_card.dart';
+import 'package:flitt_mobile/src/platform_specific.dart';
 
 import './api_test.mocks.dart';
 import './utils.dart';

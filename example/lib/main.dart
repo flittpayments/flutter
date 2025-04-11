@@ -1,4 +1,4 @@
-import 'package:cloudipsp_mobile_example/example.dart';
+import 'example.dart';
 import 'package:flutter/material.dart';
 
 void main() {

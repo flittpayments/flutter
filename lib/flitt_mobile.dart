@@ -1,4 +1,4 @@
-library cloudipsp_mobile;
+library flitt_mobile;
 
 export 'src/cloudipsp.dart' show Cloudipsp;
 export 'src/cloudipsp_error.dart';
