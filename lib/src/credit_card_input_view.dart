@@ -1,4 +1,4 @@
-import 'package:cloudipsp_mobile/cloudipsp_mobile.dart';
+import 'package:flitt_mobile/flitt_mobile.dart';
 import 'package:flutter/material.dart';
 
 import './credit_card_input_layout.dart';

@@ -1,4 +1,4 @@
-package com.cloudipsp.mobile_example;
+package com.flitt.mobile_example;
 
 import io.flutter.embedding.android.FlutterActivity;
 

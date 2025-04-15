@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.cloudipsp.mobile_example">
+    package="com.flitt.mobile_example">
    <application
-        android:label="Cloudipsp Flutter"
+        android:label="flitt Flutter"
         android:icon="@mipmap/ic_launcher">
         <activity
-            android:name="com.cloudipsp.mobile_example.MainActivity"
+            android:name="com.flitt.mobile_example.MainActivity"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

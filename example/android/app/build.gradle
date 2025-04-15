@@ -18,7 +18,7 @@ android {
     compileSdkVersion 30
 
     defaultConfig {
-        applicationId 'com.cloudipsp.sdk.flutter'
+        applicationId 'com.flitt.sdk.flutter'
         minSdkVersion 19
         targetSdkVersion 30
         versionCode 1

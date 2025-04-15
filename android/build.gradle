@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 30
-    namespace 'com.cloudipsp.mobile'
+    namespace 'com.flitt.mobile'
 
     defaultConfig {
         minSdkVersion 19

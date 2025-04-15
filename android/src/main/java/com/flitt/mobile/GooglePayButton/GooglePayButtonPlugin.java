@@ -1,4 +1,4 @@
-package com.cloudipsp.mobile.GooglePayButton;
+package com.flitt.mobile.GooglePayButton;
 
 import android.app.Activity;
 import android.content.Context;

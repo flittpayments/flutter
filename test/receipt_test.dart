@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:cloudipsp_mobile/cloudipsp_mobile.dart';
+import 'package:flitt_mobile/flitt_mobile.dart';
 
 void main() {
   group('Receipt', () {

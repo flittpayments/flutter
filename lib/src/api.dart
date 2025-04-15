@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:collection';
-import 'package:cloudipsp_mobile/src/platform_specific.dart';
+import 'package:flitt_mobile/src/platform_specific.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -11,6 +11,7 @@ import './order.dart';
 import './receipt.dart';
 
 class Api {
+  // static const API_HOST = 'https://sandbox.pay.flitt.dev';
   static const API_HOST = 'https://pay.flitt.com';
   static const URL_CALLBACK = 'http://callback';
 
@@ -167,6 +168,17 @@ class Api {
     headers['Content-Type'] = contentType;
 
     return _httpClient.post(Uri.parse(url), headers: headers, body: body);
+  }
+
+  Future<dynamic> getAjaxInfo(String token) async {
+    final Map<String, dynamic> request = HashMap();
+    request['token'] = token;
+
+    return await _call('api/checkout/ajax/info', request);
+  }
+
+  Future<dynamic> callAjax(Map<String, dynamic> requestObj) async {
+    return await _call('api/checkout/ajax', requestObj);
   }
 
   Future<dynamic> _call(String path, Map<String, dynamic> requestJson) async {

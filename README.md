@@ -11,7 +11,8 @@
 8. [WebView Integration](#webview-integration)
 9. [Complete Parameters Reference](#complete-parameters-reference)
 10. [Examples](#examples)
-11. [Troubleshooting](#troubleshooting)
+11. [Payment with bank](#Payment-with-bank)
+12. [Troubleshooting](#troubleshooting)
 
 ## Introduction
 
@@ -481,6 +482,125 @@ class _GPay extends State<GPay> {
   }
 }
 ```
+## Payment with bank
+
+### Loading Available Banks with token
+
+```dart
+Future<void> _loadBanks() async {
+  try {
+    final banks = await _cloudipsp.getAvailableBankListByToken(
+      "your_payment_token"
+    );
+    // Process the list of available banks
+  } catch (e) {
+    // Handle error
+  }
+}
+```
+### Loading Available Banks with order
+
+### Creating an Order
+
+```dart
+Order _createOrder() {
+  return Order(
+    100, // Amount in the smallest currency unit (cents/pennies)
+    'GEL', // Currency code
+    'unique_order_id', 
+    'Payment Description',
+    'customer@example.com'
+  );
+}
+```
+```dart
+Future<void> _loadBanks() async {
+  try {
+    final order = _createOrder();
+    final banks = await _cloudipsp.getAvailableBankList(order);
+    // Process the list of available banks
+  } catch (e) {
+    // Handle error
+  }
+}
+```
+
+
+```dart
+Future<void> _loadBanks() async {
+  try {
+    final order = _createOrder();
+    final banks = await _cloudipsp.getAvailableBankListByToken(
+      "your_payment_token"
+    );
+    // Process the list of available banks
+  } catch (e) {
+    // Handle error
+  }
+}
+```
+
+
+
+### Initiating Bank Payment
+
+```dart
+Future<void> _initiateBankPayment(Bank bank) async {
+  try {
+    final order = _createOrder();
+    final redirectDetails = await _cloudipsp.initiateBankPaymentByToken(
+      "your_payment_token",
+      bank,
+      autoRedirect: false // Set to true for automatic redirection
+    );
+    
+    // Manually launch payment URL if autoRedirect is false
+    if (!await launchUrl(Uri.parse(redirectDetails.url))) {
+      throw Exception('Could not launch payment URL');
+    }
+  } catch (e) {
+    // Handle payment initiation error
+  }
+}
+```
+
+## Parameters and Configuration
+
+### Bank Payment Initiation Parameters
+- `paymentToken`: Secure token for payment processing
+- `bank`: Selected bank object
+- `autoRedirect`:
+   - `true`: Automatically open bank's payment page
+   - `false`: Manually handle redirection
+
+
+## Bank List Response Parameters
+
+The `getAvailableBankListByToken` method returns a `BankRedirectDetails` object with the following parameters:
+
+- `url`: Secure token for payment processing
+- `action`: redirect
+- `responseStatus`: success | failed
+- `target`: _top | _blank | _self
+
+
+### Sample Full Response
+```json
+{
+  "action": "redirect",
+  "url": "https://main.d2u132ejo2851c.amplifyapp.com/login/?state=cDozNDI=&amount=2.0&description=merchant:%20Test%20merchant%20|%20100015008%20|",
+  "target": "_top",
+  "response_status": "success"
+}
+```
+
+
+
+### Additional Utility Methods
+- `isQuickMethod()`: Returns whether it's a quick payment method
+- `isUserPopular()`: Returns whether the bank is user-popular
+- Corresponding getter methods for each property (e.g., `getBankId()`, `getName()`)
+
 
 ## Troubleshooting
 

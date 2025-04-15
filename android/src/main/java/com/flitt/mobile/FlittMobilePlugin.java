@@ -1,4 +1,4 @@
-package com.cloudipsp.mobile;
+package com.flitt.mobile;
 
 import android.app.Activity;
 import android.content.Context;
@@ -33,7 +33,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry;
 
 
-public class CloudipspMobilePlugin implements
+public class FlittMobilePlugin implements
         ActivityAware,
         FlutterPlugin,
         MethodCallHandler,

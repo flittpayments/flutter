@@ -1,6 +1,6 @@
 library cloudipsp_ui;
 
-import 'package:cloudipsp_mobile/src/cvv_utils.dart';
+import 'package:flitt_mobile/src/cvv_utils.dart';
 import 'package:flutter/widgets.dart';
 
 import './credit_card_cvv_field.dart';

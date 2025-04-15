@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:cloudipsp_mobile/src/credit_card.dart';
+import 'package:flitt_mobile/src/credit_card.dart';
 
 void main() {
   test('should fail validation card number by length', () {

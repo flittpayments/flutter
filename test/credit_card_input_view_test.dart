@@ -2,9 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter/material.dart';
 
-import 'package:cloudipsp_mobile/cloudipsp_mobile.dart';
-import 'package:cloudipsp_mobile/src/credit_card.dart';
-import 'package:cloudipsp_mobile/src/credit_card_input_view.dart';
+import 'package:flitt_mobile/flitt_mobile.dart';
+import 'package:flitt_mobile/src/credit_card.dart';
+import 'package:flitt_mobile/src/credit_card_input_view.dart';
 
 import './utils.dart';
 

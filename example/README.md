@@ -1,6 +1,6 @@
-# cloudipsp_mobile_example
+# flitt_mobile_example
 
-Demonstrates how to use the cloudipsp_mobile plugin.
+Demonstrates how to use the flitt_mobile plugin.
 
 ## Getting Started
 
