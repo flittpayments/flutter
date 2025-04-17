@@ -251,9 +251,6 @@ class CloudipspImpl implements Cloudipsp {
 
   @override
   Future<List<Bank>> getAvailableBankList(Order order) async {
-    if (order == null) {
-      throw ArgumentError.value(order, 'order');
-    }
     final token = await _api.getToken(merchantId, order);
     return getAvailableBankListByToken(token);
   }
@@ -306,10 +303,6 @@ class CloudipspImpl implements Cloudipsp {
   @override
   Future<BankRedirectDetails> initiateBankPayment(Bank bank, Order order,
       {bool autoRedirect = true}) async {
-    if (merchantId == null) {
-      throw ArgumentError.value(merchantId, 'merchantId');
-    }
-
     final token = await _api.getToken(merchantId, order);
     return initiateBankPaymentByToken(token, bank, autoRedirect: autoRedirect);
   }

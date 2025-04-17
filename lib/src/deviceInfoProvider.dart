@@ -13,7 +13,6 @@ import 'package:uuid/uuid.dart';
 /// A utility class for gathering device information and generating device fingerprints
 /// Similar to the Java DeviceInfoProvider but implemented with Flutter best practices
 class DeviceInfoProvider {
-  static const String _prefsName = 'payment_prefs';
   static const String _deviceIdKey = 'device_id';
 
   final BuildContext? context;

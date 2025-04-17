@@ -105,11 +105,13 @@ class Api {
       request['reservation_data'] = order.reservationData;
     }
     if (order.lang != null) {
+      // ignore: deprecated_member_use
       request['lang'] = describeEnum(order.lang!);
     }
     request['preauth'] = order.preauth ? 'Y' : 'N';
     request['required_rectoken'] = order.requiredRecToken ? 'Y' : 'N';
     request['verification'] = order.verification ? 'Y' : 'N';
+    // ignore: deprecated_member_use
     request['verification_type'] = describeEnum(order.verificationType);
 
     request.addAll(order.arguments);
