@@ -16,3 +16,4 @@ export 'src/credit_card_number_field.dart' show CreditCardNumberField;
 export 'src/google_pay_button.dart';
 export 'src/order.dart';
 export 'src/receipt.dart';
+export 'src/bank.dart';
