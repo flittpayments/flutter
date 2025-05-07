@@ -4,7 +4,7 @@ export 'src/cloudipsp.dart' show Cloudipsp;
 export 'src/cloudipsp_error.dart';
 export 'src/cloudipsp_web_view.dart' show CloudipspWebView;
 export 'src/cloudipsp_web_view_confirmation.dart'
-    show CloudipspWebViewConfirmation;
+    show CloudipspWebViewConfirmation, PrivateCloudipspWebViewConfirmation;
 export 'src/credit_card.dart' hide PrivateCreditCard;
 export 'src/credit_card_cvv_field.dart' show CreditCardCvvField;
 export 'src/credit_card_exp_mm_field.dart' show CreditCardExpMmField;
