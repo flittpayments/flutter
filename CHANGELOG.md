@@ -1,3 +1,7 @@
+## 1.1.0
+* Updated Dart SDK constraint to support Dart 3.x
+* Internal improvements and cleanup
+
 ## 0.4.1
 * Fixed issue with google pay
 
