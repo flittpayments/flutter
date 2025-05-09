@@ -24,7 +24,7 @@ Add the Flitt SDK to your Flutter project by adding the dependency to your `pubs
 
 ```yaml
 dependencies:
-   flitt_mobile: ^1.0.2
+   flitt_mobile: ^2.0.0
 ```
 
 Then run:

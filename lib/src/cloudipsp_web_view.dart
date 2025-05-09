@@ -2,56 +2,77 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
-
 import 'package:webview_flutter/webview_flutter.dart';
 
 import './cloudipsp_web_view_confirmation.dart';
 import './receipt.dart';
 
 abstract class CloudipspWebView extends Widget {
-  factory CloudipspWebView(
-          {required Key key,
-          required CloudipspWebViewConfirmation confirmation}) =
-      CloudipspWebViewImpl;
+  factory CloudipspWebView({
+    required Key key,
+    required CloudipspWebViewConfirmation confirmation,
+  }) = CloudipspWebViewImpl;
 }
 
-class CloudipspWebViewImpl extends StatelessWidget implements CloudipspWebView {
+class CloudipspWebViewImpl extends StatefulWidget implements CloudipspWebView {
+  final PrivateCloudipspWebViewConfirmation _confirmation;
+
+  CloudipspWebViewImpl({
+    required Key key,
+    required CloudipspWebViewConfirmation confirmation,
+  })  : _confirmation = confirmation as PrivateCloudipspWebViewConfirmation,
+        super(key: key);
+
+  @override
+  State<CloudipspWebViewImpl> createState() => _CloudipspWebViewImplState();
+}
+
+class _CloudipspWebViewImplState extends State<CloudipspWebViewImpl> {
   static const URL_START_PATTERN =
       'http://secure-redirect.cloudipsp.com/submit/#';
   static const ADD_VIEWPORT_METADATA = '''(() => {
-  const meta = document.createElement('meta');
-  meta.setAttribute('content', 'width=device-width, user-scalable=0,');
-  meta.setAttribute('name', 'viewport');
-  const elementHead = document.getElementsByTagName('head');
-  if (elementHead) {
-  elementHead[0].appendChild(meta);
-  } else {
-  const head = document.createElement('head');
-  head.appendChild(meta);
-  }
+    const meta = document.createElement('meta');
+    meta.setAttribute('content', 'width=device-width, user-scalable=0,');
+    meta.setAttribute('name', 'viewport');
+    const elementHead = document.getElementsByTagName('head');
+    if (elementHead) {
+      elementHead[0].appendChild(meta);
+    } else {
+      const head = document.createElement('head');
+      head.appendChild(meta);
+    }
   })();''';
 
-  final PrivateCloudipspWebViewConfirmation _confirmation;
+  late final WebViewController _controller;
 
-  CloudipspWebViewImpl(
-      {required Key key, required CloudipspWebViewConfirmation confirmation})
-      : _confirmation = confirmation as PrivateCloudipspWebViewConfirmation,
-        super(key: key);
+  @override
+  void initState() {
+    super.initState();
 
-  void _onWebViewCreated(WebViewController controller) async {
-    await controller.runJavascript(ADD_VIEWPORT_METADATA);
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onNavigationRequest: _navigationDelegate,
+        ),
+      )
+      ..loadHtmlString(
+        widget._confirmation.response.body.toString(),
+        baseUrl: widget._confirmation.baseUrl,
+      );
 
     if (Platform.isAndroid) {
-      _confirmation.response.headers.forEach((key, value) async {
+      widget._confirmation.response.headers.forEach((key, value) async {
         if (key.toLowerCase() == 'set-cookie') {
-          await _confirmation.native.androidAddCookie(_confirmation.baseUrl, value);
+          await widget._confirmation.native.androidAddCookie(
+            widget._confirmation.baseUrl,
+            value,
+          );
         }
       });
     }
 
-    await controller.loadHtmlString(_confirmation.response.body.toString(),
-      baseUrl: _confirmation.baseUrl
-    );
+    _controller.runJavaScript(ADD_VIEWPORT_METADATA);
   }
 
   NavigationDecision _navigationDelegate(NavigationRequest request) {
@@ -61,10 +82,10 @@ class CloudipspWebViewImpl extends StatelessWidget implements CloudipspWebView {
     var detectsApiToken = false;
 
     if (!detectsStartPattern) {
-      detectsCallbackUrl = url.startsWith(_confirmation.callbackUrl);
+      detectsCallbackUrl = url.startsWith(widget._confirmation.callbackUrl);
       if (!detectsCallbackUrl) {
-        detectsApiToken =
-            url.startsWith('${_confirmation.apiHost}/api/checkout?token=');
+        detectsApiToken = url.startsWith(
+            '${widget._confirmation.apiHost}/api/checkout?token=');
       }
     }
 
@@ -78,9 +99,10 @@ class CloudipspWebViewImpl extends StatelessWidget implements CloudipspWebView {
         } catch (e) {
           response = jsonDecode(Uri.decodeComponent(jsonOfConfirmation));
         }
-        receipt = Receipt.fromJson(response['params'], response['url']);
+        receipt =
+            Receipt.fromJson(response['params'], response['url']);
       }
-      _confirmation.completer.complete(receipt);
+      widget._confirmation.completer.complete(receipt);
       return NavigationDecision.prevent;
     }
     return NavigationDecision.navigate;
@@ -88,11 +110,6 @@ class CloudipspWebViewImpl extends StatelessWidget implements CloudipspWebView {
 
   @override
   Widget build(BuildContext context) {
-    return WebView(
-        initialUrl: 'about:blank',
-        zoomEnabled: true,
-        javascriptMode: JavascriptMode.unrestricted,
-        navigationDelegate: _navigationDelegate,
-        onWebViewCreated: _onWebViewCreated);
+    return WebViewWidget(controller: _controller);
   }
 }
