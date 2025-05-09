@@ -124,18 +124,14 @@ public class FlittMobilePlugin implements
     }
 
     private void setCookie(String url, String cookie, @NonNull final Result result) {
-        final CookieManager cookieManager = CookieManager.getInstance();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            cookieManager.setCookie(url, cookie, new ValueCallback<Boolean>() {
-                @Override
-                public void onReceiveValue(Boolean value) {
-                    result.success(null);
-                }
-            });
-        } else {
-            cookieManager.setCookie(url, cookie);
-        }
-    }
+       CookieManager.getInstance().setCookie(url, cookie, new ValueCallback<Boolean>() {
+          @Override
+          public void onReceiveValue(Boolean value) {
+             result.success(null);
+          }
+    });
+}
+
 
     @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {

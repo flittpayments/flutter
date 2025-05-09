@@ -70,6 +70,7 @@ public class GooglePayButtonPlugin implements FlutterPlugin, ActivityAware {
         }
 
         @NonNull
+        @SuppressWarnings("unchecked")
         @Override
         public PlatformView create(@NonNull Context context, int id, @NonNull Object args) {
             Map<String, Object> params = (Map<String, Object>) args;

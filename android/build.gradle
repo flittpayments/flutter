@@ -1,11 +1,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     namespace 'com.flitt.mobile'
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
     }
 }
 
