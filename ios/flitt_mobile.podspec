@@ -3,13 +3,13 @@
 # Run `pod lib lint cloudipsp_mobile.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'cloudipsp_mobile'
+  s.name             = 'flitt_mobile'
   s.version          = '0.4.0'
-  s.summary          = 'Cloudipsp SDK for Mobile(Android, iOS)'
+  s.summary          = 'flitt SDK for Mobile(Android, iOS)'
   s.description      = <<-DESC
-Cloudipsp SDK for Mobile(Android, iOS)
+flitt SDK for Mobile(Android, iOS)
                        DESC
-  s.homepage         = 'https://fondy.eu'
+  s.homepage         = 'https://flitt.com'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Maxim Kozenko' => 'max.dnu@gmail.com' }
   s.source           = { :path => '.' }
