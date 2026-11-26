@@ -113,7 +113,10 @@ API_AVAILABLE(ios(11.0))
         self.applePayResult = nil;
 
         [controller dismissViewControllerAnimated:YES completion:^{
-            result([FlutterError errorWithCode:@"UserCanceled" message:@"User canceled ApplePay authentication" details:nil]);
+            // The result is already used when an unreadable token failed the sheet.
+            if (result != nil) {
+                result([FlutterError errorWithCode:@"UserCanceled" message:@"User canceled ApplePay authentication" details:nil]);
+            }
         }];
     } else {
         [controller dismissViewControllerAnimated:YES completion:^{
@@ -127,33 +130,62 @@ API_AVAILABLE(ios(11.0))
                                    handler:(void (^)(PKPaymentAuthorizationResult *result))completion
 API_AVAILABLE(ios(11.0))
 {
-    self.applePayCallback = completion;
+    // A dictionary literal throws on a nil value, so every token field is
+    // checked first. A token that cannot be read fails the sheet and reports
+    // ApplePayTokenInvalid to Dart instead of terminating the app.
     NSError *jsonError;
+    NSData *rawPaymentData = payment.token.paymentData;
+    id paymentData = rawPaymentData.length > 0
+        ? [NSJSONSerialization JSONObjectWithData:rawPaymentData options:NSJSONReadingMutableContainers error:&jsonError]
+        : nil;
+    NSString *displayName = payment.token.paymentMethod.displayName;
+    NSString *network = payment.token.paymentMethod.network;
+    NSString *transactionIdentifier = payment.token.transactionIdentifier;
+    if (![paymentData isKindOfClass:[NSDictionary class]] || displayName == nil
+        || network == nil || transactionIdentifier == nil) {
+        FlutterResult result = self.applePayResult;
+        self.applePayResult = nil;
+        completion([[PKPaymentAuthorizationResult alloc] initWithStatus:PKPaymentAuthorizationStatusFailure errors:nil]);
+        if (result != nil) {
+            result([FlutterError errorWithCode:@"ApplePayTokenInvalid" message:@"The Apple Pay token could not be read" details:nil]);
+        }
+        return;
+    }
 
-    NSDictionary *paymentData = [NSJSONSerialization JSONObjectWithData:payment.token.paymentData options:NSJSONReadingMutableContainers error:&jsonError];
+    self.applePayCallback = completion;
     NSDictionary *paymentMethod = @{
-                                    @"displayName":payment.token.paymentMethod.displayName,
-                                    @"network":payment.token.paymentMethod.network,
+                                    @"displayName":displayName,
+                                    @"network":network,
                                     @"type": [FlittMobilePlugin paymentMethodName: payment.token.paymentMethod.type],
                                     };
     NSDictionary *paymentToken = @{
                                    @"paymentData": paymentData,
                                    @"paymentMethod": paymentMethod,
-                                   @"transactionIdentifier": payment.token.transactionIdentifier
+                                   @"transactionIdentifier": transactionIdentifier
                                    };
     NSMutableDictionary *data = [NSMutableDictionary new];
     [data setObject:paymentToken forKey:@"token"];
     if (payment.shippingContact != nil) {
-        NSDictionary *shipingContact = @{
-                                         @"emailAddress": payment.shippingContact.emailAddress,
-                                         @"familyName": payment.shippingContact.name.familyName,
-                                         @"givenName": payment.shippingContact.name.givenName,
-                                         @"phoneNumber": payment.shippingContact.phoneNumber.stringValue,
-                                         };
+        NSMutableDictionary *shipingContact = [NSMutableDictionary new];
+        if (payment.shippingContact.emailAddress != nil) {
+            shipingContact[@"emailAddress"] = payment.shippingContact.emailAddress;
+        }
+        if (payment.shippingContact.name.familyName != nil) {
+            shipingContact[@"familyName"] = payment.shippingContact.name.familyName;
+        }
+        if (payment.shippingContact.name.givenName != nil) {
+            shipingContact[@"givenName"] = payment.shippingContact.name.givenName;
+        }
+        if (payment.shippingContact.phoneNumber.stringValue != nil) {
+            shipingContact[@"phoneNumber"] = payment.shippingContact.phoneNumber.stringValue;
+        }
         [data setObject:shipingContact forKey:@"shippingContact"];
     }
-    self.applePayResult(data);
+    FlutterResult result = self.applePayResult;
     self.applePayResult = nil;
+    if (result != nil) {
+        result(data);
+    }
 }
 
 + (NSString *)paymentMethodName:(PKPaymentMethodType)type API_AVAILABLE(ios(9.0)){
